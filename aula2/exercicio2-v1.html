@@ -1,0 +1,307 @@
+<html ng-app="myapp" ng-controller="MyCtrl">
+<head>
+	<meta charset="UTF-8"/>
+	<link rel="stylesheet" type="text/css" href="../library/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<script type="text/javascript" src="../library/angularjs/angular.min.js"></script>
+	<script type="text/javascript" src="../library/jquery/jquery-1.11.2.min.js"></script>
+	<title>Curso ng-masters - Turma 4</title>
+
+    <style>
+        * {
+            -webkit-transition: all 500ms cubic-bezier(0.235, 0.845, 0.760, 0.895); 
+            -moz-transition: all 500ms cubic-bezier(0.235, 0.845, 0.760, 0.895); 
+            -o-transition: all 500ms cubic-bezier(0.235, 0.845, 0.760, 0.895); 
+            transition: all 500ms cubic-bezier(0.235, 0.845, 0.760, 0.895); /* custom */
+
+            -webkit-transition-timing-function: cubic-bezier(0.235, 0.845, 0.760, 0.895); 
+            -moz-transition-timing-function: cubic-bezier(0.235, 0.845, 0.760, 0.895); 
+            -o-transition-timing-function: cubic-bezier(0.235, 0.845, 0.760, 0.895); 
+            transition-timing-function: cubic-bezier(0.235, 0.845, 0.760, 0.895); /* custom */
+        }
+        table { display: inline-block; }
+        table td { width: 30px; height: 30px; border-radius: 50%; background-color: #cccccc; cursor: pointer; }
+        table td.active { background-color: green; }
+    </style>
+
+</head>
+<body>
+	<nav class="navbar navbar-inverse navbar-static-top marginBottom-0" role="navigation">
+		<div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+              <a class="navbar-brand" href="../index.html"><img class="img-responsive" src="../img/AngularJS-small.png"/></a>
+            </div>
+            
+            <div class="collapse navbar-collapse" id="navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="../index.html">Home</a></li>
+                    <li class="dropdown active">
+                    	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Exercício 1 <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="../aula1/exercicio1-v1.html">Closure</a></li>
+                            <li><a href="../aula1/exercicio1-v2.html">Prototype</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div>
+    </nav>
+	        
+    <div class="jumbotron">
+    	<div class="container">
+            <h1 class="page-header">
+            	Exercício 2<br>
+	            <small>Exercício 2 da aula 2. Angulife.</small>
+	        </h1>
+    	</div>
+    </div>
+
+    <div class="container">
+		<div class="panel panel-default">
+	  		<div class="panel-body">
+				<form ng-submit="model.vaibuscarasissues()">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="row">
+        						<div class="col-sm-4">
+        							<label for="linhas">Linhas</label>
+        							<input type="number" class="form-control" required="required" ng-model="linhas" id="linhas">
+        						</div>
+        						<div class="col-sm-4">
+        							<label for="colunas">Colunas</label>
+        							<input type="number" class="form-control" required="required" ng-model="colunas" id="colunas">
+        						</div>
+                                <div class="col-sm-4">
+                                    <label for="periodo">Intervalo</label>
+                                    <input type="number" class="form-control" required="required" ng-model="periodo" id="periodo">
+                                </div>
+                            </div>
+
+                            <div style="margin: 15px 0;" class="text-center">
+    							<button class="btn btn-primary" ng-disabled="AngulifeModel.rodando" ng-click="carregar()">Carregar</button>
+                                <button class="btn btn-primary" ng-disabled="AngulifeModel.rodando" ng-click="setarValoresAleatorios()">Popular</button>
+                                <button class="btn btn-primary" ng-disabled="AngulifeModel.rodando" ng-click="iniciar()">Iniciar</button>
+                                <button class="btn btn-primary" ng-disabled="AngulifeModel.rodando" ng-click="proximoPasso()">Próximo</button>
+                            </div>
+
+                            </button>
+                        </div>
+                        <div class="col-sm-6">
+                            <h3>Passos: {{AngulifeModel.stepNum}}</h3>
+                            <h3 ng-if="AngulifeModel.loopState" style="color: green; font-weight: bold;">Fim!</h3>
+                        </div>
+			       </div>
+                </form>
+		    </div>	
+        </div>
+    </div>
+
+            <div class="text-center" style="margin: 15px 0 50px 0;">
+                <table>
+                    <tbody>
+                        <tr ng-repeat="linha in AngulifeModel.matriz">
+                            <td ng-repeat="element in linha track by $index" ng-click="changeState($index, $parent.$index)" ng-class="{active: element}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+
+
+    <script>
+
+    angular.module('myapp', []);
+
+    angular.module("myapp").factory('AngulifeModel', function($timeout){
+        var angulifeModel = {
+            matriz: [],
+            loopState: false,
+            rodando: false,
+            stepNum: 0,
+            init: function(x, y, initWithRandomValues){
+
+                angulifeModel.matriz = angulifeModel.createMatriz(x, y);
+
+                angulifeModel.loopState = false;
+                angulifeModel.rodando = false;
+                angulifeModel.stepNum = 0;
+
+                if(initWithRandomValues) {
+                    for (var a = 0; a < angulifeModel.matriz.length; a++) {
+                        for (var b = 0; b < angulifeModel.matriz[a].length; b++) {
+                            angulifeModel.matriz[a][b] = Math.floor(Math.random() * (2 - 0)) + 0;
+                        }
+                    }
+                } else {
+                    for (var a = 0; a < angulifeModel.matriz.length; a++) {
+                        for (var b = 0; b < angulifeModel.matriz[a].length; b++) {
+                            angulifeModel.matriz[a][b] = 0;
+                        }
+                    }
+                }
+            },
+            step: function(periodo){
+                var newMatriz = [];
+                var elementosIguais = true;
+                for (var a = 0; a < angulifeModel.matriz.length; a++) {
+                    newMatriz[a] = [];
+                    for (var b = 0; b < angulifeModel.matriz[a].length; b++) {
+                        var vizinhosVivos = angulifeModel.getVizinhosVivos(a, b);
+
+                        if(angulifeModel.matriz[a][b] == 1 && vizinhosVivos < 2) {
+                            // Qualquer célula viva com menos de dois vizinhos vivos morre de solidão.
+                            newMatriz[a][b] = 0;
+                        } else if(angulifeModel.matriz[a][b] == 1 && vizinhosVivos > 3) {
+                            // Qualquer célula viva com mais de três vizinhos vivos morre de superpopulação.
+                            newMatriz[a][b] = 0;
+                        } else if(angulifeModel.matriz[a][b] == 1) {
+                            // Qualquer célula viva com dois ou três vizinhos vivos continua no mesmo estado para a próxima geração.
+                            newMatriz[a][b] = 1;
+                        } else if(vizinhosVivos == 3) {
+                            // Qualquer célula morta com exatamente três vizinhos vivos se torna uma célula viva.
+                            newMatriz[a][b] = 1;
+                        } else {
+                            newMatriz[a][b] = 0;
+                        }
+
+                        if(angulifeModel.matriz[a][b] != newMatriz[a][b]) elementosIguais = false;
+                    }
+                }
+
+                if(elementosIguais) {
+                    angulifeModel.loopState = true;
+                    angulifeModel.rodando = false;
+                } else {
+                    angulifeModel.stepNum++;
+                    angulifeModel.matriz = newMatriz;
+                    if(periodo) {
+                        angulifeModel.rodando = true;
+                        $timeout(function() {
+                            angulifeModel.step(periodo);
+                        }, periodo);
+                    }
+                }
+            },
+            createMatriz: function(x, y) {
+                var matriz = new Array(y);
+                for (var i = 0; i < y; i++) {
+                    matriz[i] = new Array(x);
+                }
+
+                 return matriz;
+            },
+            getVizinhosVivos: function(x, y) {
+                var vizinhosVivos = 0;
+                var xlimits = [0, angulifeModel.matriz.length - 1];
+                var ylimits = [0, angulifeModel.matriz[x].length - 1];
+
+                if(x > 0) xlimits.splice(0, 1, x - 1);
+
+                if(x < angulifeModel.matriz.length - 1) xlimits.splice(1, 1, x + 1);
+
+                if(y > 0) ylimits.splice(0, 1, y - 1);
+
+                if(y < angulifeModel.matriz[x].length - 1) ylimits.splice(1, 1, y + 1);
+
+                for (var a = xlimits[0]; a <= xlimits[1]; a++) {
+                    for (var b = ylimits[0]; b <= ylimits[1]; b++) {
+                        if((a != x || b != y) && angulifeModel.matriz[a][b] == 1) {
+                            vizinhosVivos++;
+                        }
+                    }
+                }
+
+                return vizinhosVivos;
+            }
+            // print: function() {
+            //     for (var b = 0; b < angulifeModel.matriz[b].length; b++) {
+            //         var printX = [];
+            //         for (var a = 0; a < angulifeModel.matriz.length; a++) {
+            //             document.write(angulifeModel.matriz[a][b]);
+            //         }
+            //         document.write("<br/>");
+            //     }
+            //     document.write("<br/>");
+            // }
+        }
+
+        return angulifeModel;
+    });
+
+
+    angular.module('myapp').controller('MyCtrl', function ($scope, $timeout, AngulifeModel){
+            
+        $scope.AngulifeModel = AngulifeModel;
+        $scope.linhas = 6;
+        $scope.colunas = 8;
+        $scope.periodo = 1000;
+
+        $scope.changeState = function(x, y) {
+            AngulifeModel.matriz[y][x] = !AngulifeModel.matriz[y][x];
+        }
+
+        $scope.carregar = function() {
+            AngulifeModel.init($scope.colunas, $scope.linhas);
+        }
+
+        $scope.setarValoresAleatorios = function() {
+            AngulifeModel.init($scope.colunas, $scope.linhas, true);
+        }
+
+        $scope.iniciar = function() {
+                AngulifeModel.step($scope.periodo);
+        }
+
+        $scope.proximoPasso = function() {
+                AngulifeModel.step();
+        }
+
+        AngulifeModel.init($scope.colunas, $scope.linhas);
+
+        // Estado inicial para testes
+        // oooooooo
+        // oo@@@@oo
+        // oo@oo@oo
+        // oo@oo@oo
+        // oo@@@@oo
+        // oooooooo
+
+        AngulifeModel.matriz[1][2] = 1;
+        AngulifeModel.matriz[1][3] = 1;
+        AngulifeModel.matriz[1][4] = 1;
+        AngulifeModel.matriz[1][5] = 1;
+
+        AngulifeModel.matriz[4][2] = 1;
+        AngulifeModel.matriz[4][3] = 1;
+        AngulifeModel.matriz[4][4] = 1;
+        AngulifeModel.matriz[4][5] = 1;
+
+        AngulifeModel.matriz[2][2] = 1;
+        AngulifeModel.matriz[2][5] = 1;
+
+        AngulifeModel.matriz[3][2] = 1;
+        AngulifeModel.matriz[3][5] = 1;
+
+       // $timeout(function() {
+       //      AngulifeModel.step()
+       // }, 3000);
+    });
+    </script>
+
+	<footer class="navbar navbar-inverse marginBottom-0">
+		<div class="container">
+			<p>&copy; Yure Nery 2015 - Todos os direitos reservados.</p>
+		</div>
+	</footer>
+
+	<script type="text/javascript" src="../library/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<html ng-app="myapp" ng-controller="MyCtrl">
+<head>
+	<meta charset="UTF-8"/>
+	<link rel="stylesheet" type="text/css" href="../library/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/style.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<script type="text/javascript" src="../library/angularjs/angular.min.js"></script>
+	<script type="text/javascript" src="../library/jquery/jquery-1.11.2.min.js"></script>
+	<title>Curso ng-masters - Turma 4</title>
+</head>
+<body>
+	<nav class="navbar navbar-inverse navbar-static-top marginBottom-0" role="navigation">
+		<div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+              <a class="navbar-brand" href="../index.html"><img class="img-responsive" src="../img/AngularJS-small.png"/></a>
+            </div>
+            
+            <div class="collapse navbar-collapse" id="navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="../index.html">Home</a></li>
+                    <li class="dropdown active">
+                    	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Exercício 1 <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="../aula1/exercicio1-v1.html">Closure</a></li>
+                            <li><a href="../aula1/exercicio1-v2.html">Prototype</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div>
+    </nav>
+	        
+    <div class="jumbotron">
+    	<div class="container">
+            <h1 class="page-header">
+            	Exercício 1<br>
+	            <small>Exercício 1 da aula 1. Versão com Closure.</small>
+	        </h1>
+    	</div>
+    </div>
+
+    <div class="container">
+		<div class="panel panel-default">
+	  		<div class="panel-body">
+				<form ng-submit="model.vaibuscarasissues()">
+                    <div class="row">
+						<div class="col-md-5 col-sm-4">
+							<label for="usuario">Usuário</label>
+							<input type="text" class="form-control" required="required" name="usuario" ng-model="model.usuario" id="usuario">
+						</div>
+						<div class="col-md-5 col-sm-5">
+							<label for="repositorio">Repositório</label>
+							<input type="text" class="form-control" required="required" name="repositorio" ng-model="model.repositorio" id="repositorio">
+						</div>
+
+						<div class="col-md-2 col-sm-3">
+							<label for="repositorio">&nbsp;</label>
+							<button type="submit" class="form-control btn btn-primary" ng-disabled="loading">
+                                <span ng-hide="loading">Buscar</span>
+                                <span ng-show="loading">Aguarde... <i class="fa fa-spinner fa-spin"></i></span>
+                            </button>
+						</div>
+			       </div>
+                </form>
+		    </div>	
+        </div>
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<table class="table" id="table" style="table-layout:fixed;">
+					<caption><h4>Issues</h4></caption>
+					<thead>
+						<tr>
+							<th width="50"></th>
+							<th width="416">Título</th>
+							<th>Descrição</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr id="trTemplate" ng-repeat="issue in model.issues">
+							<th scope="row" id="id">{{issue.number}}</th>
+							<td id="titulo">{{issue.title}}</td>
+							<td id="descricao">{{issue.body}}</td>
+						</tr>
+						
+					</tbody>
+				</table>
+			</div>
+		</div>
+    </div>	
+</div>
+
+
+
+    <script>
+    angular.module('myapp', []).controller('MyCtrl', function ($scope, $http){
+        
+        var model = {
+            usuario: 'freedomsponsors',
+            repositorio: 'www.freedomsponsors.org',
+            issues: [],
+            vaibuscarasissues: function(){
+                $scope.loading = true;
+
+                $http.get("https://api.github.com/repos/"+model.usuario+"/"+model.repositorio+"/issues").
+                success(function(issues){
+                    model.issues = issues;
+                    $scope.loading = false;
+                }).
+                error(function(data, status, headers, config) {
+                    $scope.loading = false;
+                });
+
+            }
+        }
+            
+        $scope.model = model;
+        $scope.loading = false;
+    });
+    </script>
+
+	<footer class="navbar navbar-inverse marginBottom-0">
+		<div class="container">
+			<p>&copy; Yure Nery 2015 - Todos os direitos reservados.</p>
+		</div>
+	</footer>
+
+	<script type="text/javascript" src="../library/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../js/script.js"></script>
+</body>
+</html>

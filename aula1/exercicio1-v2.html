@@ -1,0 +1,193 @@
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<link rel="stylesheet" type="text/css" href="../library/bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/style.css">
+	<script type="text/javascript" src="../library/angularjs/angular.min.js"></script>
+	<script type="text/javascript" src="../library/jquery/jquery-1.11.2.min.js"></script>
+	<title>Curso ng-masters - Turma 4</title>
+</head>
+<body>
+	<nav class="navbar navbar-inverse navbar-static-top marginBottom-0" role="navigation">
+		<div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+              <a class="navbar-brand" href="../index.html"><img class="img-responsive" src="../img/AngularJS-small.png"/></a>
+            </div>
+            
+            <div class="collapse navbar-collapse" id="navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="../index.html">Home</a></li>
+                    <li class="dropdown active">
+                    	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Exercício 1 <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="../aula1/exercicio1-v1.html">Closure</a></li>
+                            <li><a href="../aula1/exercicio1-v2.html">Prototype</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div>
+    </nav>
+	        
+    <div class="jumbotron">
+    	<div class="container">
+            <h1 class="page-header">
+            	Exercício 1<br>
+	            <small>Exercício 1 da aula 1. Versão com Closure.</small>
+	        </h1>
+    	</div>
+    </div>
+
+    <div class="container">
+    	<div class="row">
+    		<div class="col-sm-12 col-sm-offset-0">
+
+    			<div class="header clearfix">
+    				<h3 class="text-muted">Exercício 1</h3>
+    			</div>
+
+    			<div class="row">
+    				<div class="panel panel-default">
+    			  		<div class="panel-body">
+    						<form>
+    						<div class="row">
+    							<div class="col-md-4">
+    								<label for="usuario">Usuário</label>
+    								<input type="text" class="form-control " name="usuario" id="usuario">
+    							</div>
+    							<div class="col-md-6">
+    								<label for="repositorio">Repositório</label>
+    								<input type="text" class="form-control" name="repositorio" id="repositorio">
+    							</div>
+
+    							<div class="col-md-2">
+    								<label for="repositorio">&nbsp;</label>
+    								<input type="button" class="form-control btn btn-primary" id="btnBuscar" onclick="vaibuscarasissues()" value="Buscar">
+    							</div>
+    						
+    					</div></form>
+    				</div>	
+    			</div>
+    			<div class="row">
+    				<div class="col-md-12">
+    					<div class="panel panel-default">
+    						<div class="panel-body">
+    							<table class="table table-striped" id="table" style="table-layout:fixed;">
+    								<caption><h4>Issues</h4></caption>
+    								<thead>
+    									<tr>
+    										<th width="50">#</th>
+    										<th width="416">Titulo</th>
+    										<th>Descrição</th>
+    									</tr>
+    								</thead>
+    								<tbody>
+    									<tr id="trTemplate" style="display:none">
+    										<th scope="row" id="id">330</th>
+    										<td id="titulo">Added test for json_views.list_issue_card</td>
+    										<td id="descricao"></td>
+    									</tr>
+    									
+    								</tbody>
+    							</table>
+    						</div>
+    					</div>	
+    				</div>
+    			</div>	
+    		</div>
+    	</div>
+    </div>	
+</div>
+
+
+
+    <script>
+
+
+    function vaibuscarasissues() {
+
+    	function GithubRepo(username, reponame){
+    		var username = username;
+    		var reponame = reponame;
+    		var issues = [];
+    		var githubRepo = {
+    			
+    			'buscar_issues' : function() {
+
+    				$.get("https://api.github.com/repos/"+username+"/"+reponame+"/issues", function(data){
+    					issues = data;
+    					githubRepo.limparTabela("table");
+    					githubRepo.populaTabela("table");
+    				});
+    				
+    			},
+
+    			'populaTabela' : function(idTable) {
+    				
+    				var $table = $("#"+idTable);
+    				
+    				for(var index in issues){
+    					
+    					var issue = issues[index];
+
+    					var $trTemplate = $table.find("#trTemplate").clone();
+
+    					$trTemplate.find("#id").html(issue.number);
+    					$trTemplate.find("#titulo").html(issue.title);
+    					$trTemplate.find("#descricao").html(issue.body);
+    					$trTemplate.removeAttr("style","");
+    					$trTemplate.removeAttr("id","");
+    					$trTemplate.insertBefore($table.find("#trTemplate"));
+    				}
+    				
+    			},
+
+    			'limparTabela' : function(idTable) {
+    				$("#"+idTable+" > tbody > tr").each(function(){
+    					var idTr = $(this).attr("id");
+    					if(idTr != "trTemplate"){
+    						$(this).remove();
+    					}
+
+    				});
+
+
+    			}
+
+    		}
+
+    		return githubRepo;
+
+    	}
+
+    	var usuario = $("#usuario").val();
+    	var repositorio = $("#repositorio").val();
+
+    	if(usuario == "" || repositorio == ""){
+    		alert('Usuário e repositório obrigatórios');
+    	}else{
+    		var le_repo = GithubRepo(usuario, repositorio);
+    		le_repo.buscar_issues();
+    	}
+
+    	
+    }
+
+    </script>
+
+	<footer class="navbar navbar-inverse marginBottom-0">
+		<div class="container">
+			<p>&copy; Yure Nery 2015 - Todos os direitos reservados.</p>
+		</div>
+	</footer>
+
+	<script type="text/javascript" src="../library/bootstrap/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../js/script.js"></script>
+</body>
+</html>
